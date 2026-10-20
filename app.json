@@ -33,6 +33,13 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
+      ],
+      "expo-secure-store",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Permite escanear o QR code de pareamento com o desktop Lumen."
+        }
       ]
     ],
     "experiments": {

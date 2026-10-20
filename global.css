@@ -1,0 +1,15 @@
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css";
+
+@import "nativewind/theme";
+
+@theme {
+  --color-lumen-50: oklch(0.97 0.02 250);
+  --color-lumen-500: oklch(0.72 0.15 250);
+  --color-lumen-600: oklch(0.62 0.15 250);
+  --color-lumen-700: oklch(0.52 0.14 250);
+  --color-surface: oklch(0.16 0.01 250);
+  --color-surface-raised: oklch(0.21 0.012 250);
+  --color-edge: oklch(0.28 0.012 250);
+}
