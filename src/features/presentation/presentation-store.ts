@@ -1,7 +1,7 @@
-import { create } from "zustand";
+import { create } from 'zustand';
 
-import { connection } from "@/src/core/connection/manager";
-import type { PresentationSync } from "@/src/core/protocol";
+import { connection } from '@/src/core/connection/manager';
+import type { PresentationSync } from '@/src/core/protocol';
 
 type PresentationState = {
   kind: string | null;
@@ -20,9 +20,7 @@ type PresentationState = {
   reset: () => void;
 };
 
-function request(
-  event: Parameters<typeof connection.request>[0],
-): void {
+function request(event: Parameters<typeof connection.request>[0]): void {
   connection.request(event).catch(() => {
     // Timeout/offline: presentation_sync reconciles.
   });
@@ -48,25 +46,25 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
 
   slideNext: () => {
     set((s) => ({ slideIndex: Math.min(s.slideIndex + 1, s.totalSlides) }));
-    request({ event: "slide_next" });
+    request({ event: 'slide_next' });
   },
   slidePrev: () => {
     set((s) => ({ slideIndex: Math.max(s.slideIndex - 1, 0) }));
-    request({ event: "slide_prev" });
+    request({ event: 'slide_prev' });
   },
   slideGoto: (index) => {
     set({ slideIndex: index });
-    request({ event: "slide_goto", index });
+    request({ event: 'slide_goto', index });
   },
   toggleBlackout: () => {
     const on = !get().isBlack;
     set({ isBlack: on });
-    request({ event: "blackout", on });
+    request({ event: 'blackout', on });
   },
   toggleWallpaper: () => {
     const on = !get().isWallpaper;
     set({ isWallpaper: on });
-    request({ event: "wallpaper", on });
+    request({ event: 'wallpaper', on });
   },
 
   reset: () =>

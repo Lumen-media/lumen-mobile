@@ -1,13 +1,13 @@
+// biome-ignore-all lint/security/noDangerouslySetInnerHtml: gluestack generated theme script, no user input
 'use client';
-import React, { useEffect, useLayoutEffect } from 'react';
 import { OverlayProvider } from '@gluestack-ui/core/overlay/creator';
 import { ToastProvider } from '@gluestack-ui/core/toast/creator';
+import React, { useEffect, useLayoutEffect } from 'react';
 import { script } from './script';
 
 export type ModeType = 'light' | 'dark' | 'system';
 
-export const useSafeLayoutEffect =
-  typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+export const useSafeLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 export function GluestackUIProvider({
   mode = 'light',

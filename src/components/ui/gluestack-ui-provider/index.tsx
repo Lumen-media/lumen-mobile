@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react';
-import { View, Appearance, type ColorSchemeName, type ViewProps } from 'react-native';
 import { OverlayProvider } from '@gluestack-ui/core/overlay/creator';
 import { ToastProvider } from '@gluestack-ui/core/toast/creator';
+import type React from 'react';
+import { useEffect } from 'react';
+import { Appearance, type ColorSchemeName, View, type ViewProps } from 'react-native';
 
 export type ModeType = 'light' | 'dark' | 'system';
 
@@ -18,12 +19,7 @@ export function GluestackUIProvider({
   }, [mode]);
 
   return (
-    <View
-      style={[
-        { flex: 1, height: '100%', width: '100%' },
-        props.style,
-      ]}
-    >
+    <View style={[{ flex: 1, height: '100%', width: '100%' }, props.style]}>
       <OverlayProvider>
         <ToastProvider>{props.children}</ToastProvider>
       </OverlayProvider>

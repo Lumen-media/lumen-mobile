@@ -1,7 +1,7 @@
-import { create } from "zustand";
+import { create } from 'zustand';
 
-import { connection } from "@/src/core/connection/manager";
-import type { QueueItem, QueueSync } from "@/src/core/protocol";
+import { connection } from '@/src/core/connection/manager';
+import type { QueueItem, QueueSync } from '@/src/core/protocol';
 
 type QueueState = {
   items: QueueItem[];
@@ -17,15 +17,13 @@ type QueueState = {
 };
 
 function logOpFail(result: { event: string; reason?: unknown }): void {
-  if (result.event.endsWith("_op_fail")) {
+  if (result.event.endsWith('_op_fail')) {
     // TODO: revert optimistic state / surface a toast.
-    console.warn("queue op failed:", result);
+    console.warn('queue op failed:', result);
   }
 }
 
-async function op(
-  event: Parameters<typeof connection.request>[0],
-): Promise<void> {
+async function op(event: Parameters<typeof connection.request>[0]): Promise<void> {
   try {
     logOpFail(await connection.request(event));
   } catch {
@@ -45,13 +43,13 @@ export const useQueueStore = create<QueueState>((set, get) => ({
 
   remove: (id) => {
     set((s) => ({ items: s.items.filter((item) => item.id !== id) }));
-    void op({ event: "queue_remove", id });
+    void op({ event: 'queue_remove', id });
   },
 
   jump: (id) => {
     const index = get().items.findIndex((item) => item.id === id);
     if (index >= 0) set({ currentIndex: index });
-    void op({ event: "queue_jump", id });
+    void op({ event: 'queue_jump', id });
   },
 
   move: (id, position) => {
@@ -61,16 +59,16 @@ export const useQueueStore = create<QueueState>((set, get) => ({
     const [moved] = items.splice(from, 1);
     items.splice(Math.max(0, Math.min(position, items.length)), 0, moved);
     set({ items });
-    void op({ event: "queue_move", id, position });
+    void op({ event: 'queue_move', id, position });
   },
 
   shuffle: () => {
-    void op({ event: "queue_shuffle" });
+    void op({ event: 'queue_shuffle' });
   },
 
   clear: () => {
     set({ items: [], currentIndex: null });
-    void op({ event: "queue_clear" });
+    void op({ event: 'queue_clear' });
   },
 
   reset: () => set({ items: [], currentIndex: null }),

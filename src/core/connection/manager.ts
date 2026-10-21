@@ -1,53 +1,49 @@
-import Constants from "expo-constants";
-import { AppState, Platform, type AppStateStatus } from "react-native";
+import Constants from 'expo-constants';
+import { AppState, type AppStateStatus, Platform } from 'react-native';
 
 import {
+  type AuthOk,
   DEFAULT_PERMISSIONS,
   isKnown,
-  type AuthOk,
   type Permissions,
   type ServerMessage,
-} from "@/src/core/protocol";
+} from '@/src/core/protocol';
 import {
-  getOrCreateDeviceId,
   getLastConnected,
+  getOrCreateDeviceId,
+  type PairedDevice,
   removePaired,
   savePaired,
   touchPaired,
-  type PairedDevice,
-} from "@/src/core/secure/devices";
+} from '@/src/core/secure/devices';
 
-import { onServerMessage } from "./bus";
-import { LumenSocket } from "./socket";
-import {
-  resetConnection,
-  setConnection,
-  useConnectionStore,
-} from "./store";
+import { onServerMessage } from './bus';
+import { LumenSocket } from './socket';
+import { resetConnection, setConnection, useConnectionStore } from './store';
 
 const BACKOFF_MS = [500, 1000, 2000, 4000, 8000, 10000];
 const AUTH_TIMEOUT_MS = 8000;
-const TERMINAL_CLOSE_CODES: Record<number, "denied" | "expired"> = {
-  4001: "denied",
-  4003: "expired",
-  4004: "expired",
-  4005: "expired",
+const TERMINAL_CLOSE_CODES: Record<number, 'denied' | 'expired'> = {
+  4001: 'denied',
+  4003: 'expired',
+  4004: 'expired',
+  4005: 'expired',
 };
 
 type Desired =
-  | { mode: "auth"; device: PairedDevice }
-  | { mode: "register"; host: string; port: number; token: string };
+  | { mode: 'auth'; device: PairedDevice }
+  | { mode: 'register'; host: string; port: number; token: string };
 
 function normalizePermissions(raw: Record<string, boolean>): Permissions {
   return { ...DEFAULT_PERMISSIONS, ...raw };
 }
 
 function deviceName(): string {
-  return Constants.deviceName ?? "Lumen Remote";
+  return Constants.deviceName ?? 'Lumen Remote';
 }
 
 function appVersion(): string {
-  return Constants.expoConfig?.version ?? "1.0.0";
+  return Constants.expoConfig?.version ?? '1.0.0';
 }
 
 /**
@@ -70,9 +66,19 @@ class ConnectionManager {
     if (this.initialized) return;
     this.initialized = true;
     this.unsubscribe = onServerMessage((message) => this.handleMessage(message));
-    this.appStateSubscription = AppState.addEventListener("change", (state) =>
-      this.handleAppState(state),
+    this.appStateSubscription = AppState.addEventListener('change', (state) =>
+      this.handleAppState(state)
     );
+  }
+
+  /** Tears down listeners and timers (hot reload / tests). */
+  dispose(): void {
+    this.unsubscribe?.();
+    this.unsubscribe = null;
+    this.appStateSubscription?.remove();
+    this.appStateSubscription = null;
+    if (this.reconnectTimer) clearTimeout(this.reconnectTimer);
+    if (this.authTimer) clearTimeout(this.authTimer);
   }
 
   /** Launch flow: connect to the most recently used desktop, if any. */
@@ -80,17 +86,17 @@ class ConnectionManager {
     this.init();
     const device = await getLastConnected();
     if (!device) {
-      setConnection({ status: "idle", autoConnecting: false });
+      setConnection({ status: 'idle', autoConnecting: false });
       return;
     }
     setConnection({
-      status: "connecting",
+      status: 'connecting',
       autoConnecting: true,
       error: null,
       endpoint: { host: device.host, port: device.port },
       desktopName: device.desktopName,
     });
-    this.desired = { mode: "auth", device };
+    this.desired = { mode: 'auth', device };
     this.attempt = 0;
     await this.open();
   }
@@ -99,13 +105,13 @@ class ConnectionManager {
   async connectTo(device: PairedDevice): Promise<void> {
     this.init();
     setConnection({
-      status: "connecting",
+      status: 'connecting',
       autoConnecting: false,
       error: null,
       endpoint: { host: device.host, port: device.port },
       desktopName: device.desktopName,
     });
-    this.desired = { mode: "auth", device };
+    this.desired = { mode: 'auth', device };
     this.attempt = 0;
     await this.open();
   }
@@ -114,13 +120,13 @@ class ConnectionManager {
   async pair(host: string, port: number, token: string): Promise<void> {
     this.init();
     setConnection({
-      status: "registering",
+      status: 'registering',
       autoConnecting: false,
       error: null,
       endpoint: { host, port },
       desktopName: null,
     });
-    this.desired = { mode: "register", host, port, token };
+    this.desired = { mode: 'register', host, port, token };
     this.attempt = 0;
     await this.open();
   }
@@ -129,9 +135,9 @@ class ConnectionManager {
   forget(): void {
     const current = useConnectionStore.getState().endpoint;
     const desired = this.desired;
-    this.socket?.send({ event: "forget_device" });
+    this.socket?.send({ event: 'forget_device' });
     this.desired = null;
-    if (desired?.mode === "auth" && current) {
+    if (desired?.mode === 'auth' && current) {
       void removePaired(desired.device.key);
     }
     resetConnection();
@@ -147,15 +153,15 @@ class ConnectionManager {
   }
 
   /** Fire-and-forget event. No-op when there is no live socket. */
-  send(event: Parameters<LumenSocket["send"]>[0]): void {
+  send(event: Parameters<LumenSocket['send']>[0]): void {
     this.socket?.send(event);
   }
 
   /** Event with `request_id`; rejects when socket is down or ack times out. */
-  request(event: Parameters<LumenSocket["request"]>[0]): Promise<ServerMessage> {
+  request(event: Parameters<LumenSocket['request']>[0]): Promise<ServerMessage> {
     const socket = this.socket;
-    if (!socket || !socket.isOpen) {
-      return Promise.reject(new Error("not_connected"));
+    if (!socket?.isOpen) {
+      return Promise.reject(new Error('not_connected'));
     }
     return socket.request(event);
   }
@@ -167,8 +173,8 @@ class ConnectionManager {
     const desired = this.desired;
     if (!desired) return;
 
-    const host = desired.mode === "auth" ? desired.device.host : desired.host;
-    const port = desired.mode === "auth" ? desired.device.port : desired.port;
+    const host = desired.mode === 'auth' ? desired.device.host : desired.host;
+    const port = desired.mode === 'auth' ? desired.device.port : desired.port;
 
     const socket = new LumenSocket();
     socket.onClose = (code) => this.handleClose(code);
@@ -183,19 +189,19 @@ class ConnectionManager {
 
     if (this.desired !== desired) return; // superseded while connecting
 
-    if (desired.mode === "register") {
+    if (desired.mode === 'register') {
       socket.send({
-        event: "register",
+        event: 'register',
         token: desired.token,
         device_id: await getOrCreateDeviceId(),
         device_name: deviceName(),
-        device_type: "mobile",
+        device_type: 'mobile',
         os: Platform.OS,
         version: appVersion(),
       });
     } else {
       socket.send({
-        event: "auth",
+        event: 'auth',
         device_id: desired.device.deviceId,
         access_token: desired.device.accessToken,
       });
@@ -203,20 +209,20 @@ class ConnectionManager {
 
     this.authTimer = setTimeout(() => {
       const status = useConnectionStore.getState().status;
-      if (status !== "connected") this.scheduleReconnect();
+      if (status !== 'connected') this.scheduleReconnect();
     }, AUTH_TIMEOUT_MS);
   }
 
   private handleMessage(message: ServerMessage): void {
     if (!isKnown(message)) return;
-    if (message.event === "auth_ok") {
+    if (message.event === 'auth_ok') {
       void this.handleAuthOk(message);
-    } else if (message.event === "auth_fail") {
+    } else if (message.event === 'auth_fail') {
       this.handleAuthFail(message.reason);
-    } else if (message.event === "device_deactivated") {
+    } else if (message.event === 'device_deactivated') {
       this.desired = null;
       this.teardownSocket();
-      setConnection({ status: "expired", error: "device_deactivated" });
+      setConnection({ status: 'expired', error: 'device_deactivated' });
     }
   }
 
@@ -225,7 +231,7 @@ class ConnectionManager {
     this.attempt = 0;
 
     setConnection({
-      status: "connected",
+      status: 'connected',
       desktopName: message.desktop_name,
       permissions: normalizePermissions(message.permissions),
       error: null,
@@ -233,7 +239,7 @@ class ConnectionManager {
     });
 
     const desired = this.desired;
-    if (desired?.mode === "register") {
+    if (desired?.mode === 'register') {
       await savePaired({
         key: message.desktop_name,
         desktopName: message.desktop_name,
@@ -242,18 +248,18 @@ class ConnectionManager {
         deviceId: await getOrCreateDeviceId(),
         accessToken: message.access_token,
       });
-    } else if (desired?.mode === "auth") {
+    } else if (desired?.mode === 'auth') {
       await touchPaired(desired.device.key, desired.device.host, desired.device.port);
     }
 
     // Pull player/queue/presentation state right after the session opens
     // (pending on desktop; unknown events are ignored server-side).
-    this.socket?.send({ event: "sync_request" });
+    this.socket?.send({ event: 'sync_request' });
   }
 
   private handleAuthFail(reason: string): void {
     this.clearAuthTimer();
-    const status = reason === "unauthorized" ? "denied" : "expired";
+    const status = reason === 'unauthorized' ? 'denied' : 'expired';
     this.desired = null;
     setConnection({ status, error: reason, autoConnecting: false });
   }
@@ -263,7 +269,7 @@ class ConnectionManager {
     if (this.suspended || !this.desired) return;
 
     const current = useConnectionStore.getState().status;
-    if (current === "denied" || current === "expired") return;
+    if (current === 'denied' || current === 'expired') return;
 
     const terminal = TERMINAL_CLOSE_CODES[code];
     if (terminal) {
@@ -278,21 +284,21 @@ class ConnectionManager {
     if (!this.desired || this.suspended) return;
     const delay = BACKOFF_MS[Math.min(this.attempt, BACKOFF_MS.length - 1)];
     this.attempt += 1;
-    setConnection({ status: "reconnecting", autoConnecting: false });
+    setConnection({ status: 'reconnecting', autoConnecting: false });
     this.reconnectTimer = setTimeout(() => {
       void this.open();
     }, delay);
   }
 
   private handleAppState(state: AppStateStatus): void {
-    if (state === "background") {
+    if (state === 'background') {
       this.suspended = true;
       this.clearTimers();
       this.teardownSocket();
-    } else if (state === "active" && this.suspended) {
+    } else if (state === 'active' && this.suspended) {
       this.suspended = false;
       if (this.desired) {
-        setConnection({ status: "reconnecting" });
+        setConnection({ status: 'reconnecting' });
         void this.open();
       }
     }

@@ -1,7 +1,7 @@
-import { create } from "zustand";
+import { create } from 'zustand';
 
-import { connection } from "@/src/core/connection/manager";
-import type { PlayerSync, PlayerTick } from "@/src/core/protocol";
+import { connection } from '@/src/core/connection/manager';
+import type { PlayerSync, PlayerTick } from '@/src/core/protocol';
 
 export type PlayerMedia = {
   url: string | null;
@@ -54,17 +54,17 @@ const initialState = {
   lyric: null,
 } satisfies Omit<
   PlayerState,
-  | "applySync"
-  | "applyTick"
-  | "playPause"
-  | "stop"
-  | "next"
-  | "previous"
-  | "seek"
-  | "setVolume"
-  | "toggleMute"
-  | "toggleLoop"
-  | "reset"
+  | 'applySync'
+  | 'applyTick'
+  | 'playPause'
+  | 'stop'
+  | 'next'
+  | 'previous'
+  | 'seek'
+  | 'setVolume'
+  | 'toggleMute'
+  | 'toggleLoop'
+  | 'reset'
 >;
 
 /** Live position extrapolated from the last anchor while playing. */
@@ -119,27 +119,27 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
 
   // Optimistic: playback resumes/pauses instantly, the next sync reconciles.
   playPause: () => {
-    connection.send({ event: "play_pause" });
+    connection.send({ event: 'play_pause' });
     set({ isPlaying: !get().isPlaying, anchoredAt: Date.now() });
   },
-  stop: () => connection.send({ event: "stop" }),
-  next: () => connection.send({ event: "next" }),
-  previous: () => connection.send({ event: "previous" }),
+  stop: () => connection.send({ event: 'stop' }),
+  next: () => connection.send({ event: 'next' }),
+  previous: () => connection.send({ event: 'previous' }),
   seek: (seconds) => {
-    connection.send({ event: "seek", value: seconds });
+    connection.send({ event: 'seek', value: seconds });
     set({ position: seconds, anchoredAt: Date.now() });
   },
   setVolume: (value) => {
-    connection.send({ event: "set_volume", value: Math.round(value) });
+    connection.send({ event: 'set_volume', value: Math.round(value) });
     set({ volume: value, isMuted: value === 0 });
   },
   toggleMute: () => {
-    connection.send({ event: "mute" });
+    connection.send({ event: 'mute' });
     set((s) => ({ isMuted: !s.isMuted }));
   },
   toggleLoop: () => {
     const next = get().isLoop ? 0 : 1;
-    connection.send({ event: "set_loop", value: next as 0 | 1 });
+    connection.send({ event: 'set_loop', value: next as 0 | 1 });
     set({ isLoop: next === 1 });
   },
 

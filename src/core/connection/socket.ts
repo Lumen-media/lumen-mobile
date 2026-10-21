@@ -1,17 +1,13 @@
-import {
-  parseServerMessage,
-  type ClientEvent,
-  type ServerMessage,
-} from "@/src/core/protocol";
+import { type ClientEvent, parseServerMessage, type ServerMessage } from '@/src/core/protocol';
 
-import { emitServerMessage } from "./bus";
+import { emitServerMessage } from './bus';
 
 const ACK_EVENTS = new Set([
-  "queue_op_ok",
-  "queue_op_fail",
-  "presentation_op_ok",
-  "presentation_op_fail",
-  "chat_error",
+  'queue_op_ok',
+  'queue_op_fail',
+  'presentation_op_ok',
+  'presentation_op_fail',
+  'chat_error',
 ]);
 
 type Pending = {
@@ -57,14 +53,14 @@ export class LumenSocket {
       ws.onerror = () => {
         if (!settled) {
           settled = true;
-          reject(new Error("websocket_error"));
+          reject(new Error('websocket_error'));
         }
       };
       ws.onclose = (event) => {
         this.rejectAllPending();
         if (!settled) {
           settled = true;
-          reject(new Error("websocket_closed"));
+          reject(new Error('websocket_closed'));
         }
         this.onClose?.(event.code);
       };
@@ -82,7 +78,7 @@ export class LumenSocket {
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
         this.pending.delete(id);
-        reject(new Error("ack_timeout"));
+        reject(new Error('ack_timeout'));
       }, timeoutMs);
       this.pending.set(id, { resolve, reject, timer });
       try {
@@ -118,9 +114,9 @@ export class LumenSocket {
     const message = parseServerMessage(raw);
     if (!message) return;
 
-    if (ACK_EVENTS.has(message.event) && "request_id" in message) {
+    if (ACK_EVENTS.has(message.event) && 'request_id' in message) {
       const id = message.request_id;
-      if (typeof id === "number") {
+      if (typeof id === 'number') {
         const waiter = this.pending.get(id);
         if (waiter) {
           clearTimeout(waiter.timer);
@@ -136,7 +132,7 @@ export class LumenSocket {
   private rejectAllPending(): void {
     for (const waiter of this.pending.values()) {
       clearTimeout(waiter.timer);
-      waiter.reject(new Error("socket_closed"));
+      waiter.reject(new Error('socket_closed'));
     }
     this.pending.clear();
   }

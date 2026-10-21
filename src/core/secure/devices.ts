@@ -1,7 +1,7 @@
-import * as SecureStore from "expo-secure-store";
+import * as SecureStore from 'expo-secure-store';
 
-const PAIRED_KEY = "lumen.paired.v1";
-const DEVICE_ID_KEY = "lumen.device_id.v1";
+const PAIRED_KEY = 'lumen.paired.v1';
+const DEVICE_ID_KEY = 'lumen.device_id.v1';
 
 export type PairedDevice = {
   /** Stable identity of the desktop: its machine name. */
@@ -15,9 +15,9 @@ export type PairedDevice = {
 };
 
 function randomUuid(): string {
-  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
-    const v = c === "x" ? r : (r & 0x3) | 0x8;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
 }
@@ -49,7 +49,7 @@ async function writePaired(devices: PairedDevice[]): Promise<void> {
 
 /** Upserts by desktop machine name and returns the stored entry. */
 export async function savePaired(
-  device: Omit<PairedDevice, "lastConnectedAt"> & { lastConnectedAt?: number },
+  device: Omit<PairedDevice, 'lastConnectedAt'> & { lastConnectedAt?: number }
 ): Promise<PairedDevice> {
   const devices = await listPaired();
   const entry: PairedDevice = {
@@ -65,7 +65,7 @@ export async function savePaired(
 export async function touchPaired(key: string, host: string, port: number): Promise<void> {
   const devices = await listPaired();
   const next = devices.map((d) =>
-    d.key === key ? { ...d, host, port, lastConnectedAt: Date.now() } : d,
+    d.key === key ? { ...d, host, port, lastConnectedAt: Date.now() } : d
   );
   await writePaired(next);
 }

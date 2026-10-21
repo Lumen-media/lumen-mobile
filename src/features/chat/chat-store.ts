@@ -1,7 +1,7 @@
-import { create } from "zustand";
+import { create } from 'zustand';
 
-import { connection } from "@/src/core/connection/manager";
-import type { ChatMessage } from "@/src/core/protocol";
+import { connection } from '@/src/core/connection/manager';
+import type { ChatMessage } from '@/src/core/protocol';
 
 type ChatState = {
   messages: ChatMessage[];
@@ -35,7 +35,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   applyMessage: (message) =>
     set((s) => ({
       messages: [...s.messages.filter((m) => m.id !== message.id), message].sort(
-        (a, b) => a.id - b.id,
+        (a, b) => a.id - b.id
       ),
     })),
 
@@ -47,7 +47,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
         if (m.id !== message_id) return m;
         const existing = m.reactions ?? [];
         const filtered = existing.filter(
-          (r) => !(r.emoji === reaction?.emoji && r.sender_id === reaction?.sender_id),
+          (r) => !(r.emoji === reaction?.emoji && r.sender_id === reaction?.sender_id)
         );
         return {
           ...m,
@@ -68,7 +68,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     set((s) => ({ messages: s.messages.filter((m) => m.id !== messageId) })),
 
   loadHistory: () => {
-    connection.send({ event: "chat_history", limit: 100 });
+    connection.send({ event: 'chat_history', limit: 100 });
   },
 
   send: async (text) => {
@@ -76,7 +76,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     if (!trimmed || get().sending) return false;
     set({ sending: true });
     try {
-      await connection.request({ event: "chat_send", text: trimmed });
+      await connection.request({ event: 'chat_send', text: trimmed });
       return true;
     } catch {
       return false;
@@ -87,7 +87,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
   markRead: () => {
     const last = get().messages.at(-1);
-    if (last) connection.send({ event: "chat_read", last_read_id: last.id });
+    if (last) connection.send({ event: 'chat_read', last_read_id: last.id });
   },
 
   reset: () => set({ messages: [], historyLoaded: false, sending: false, typing: {} }),

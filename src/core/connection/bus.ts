@@ -1,4 +1,4 @@
-import type { ServerMessage } from "@/src/core/protocol";
+import type { ServerMessage } from '@/src/core/protocol';
 
 type Handler = (message: ServerMessage) => void;
 

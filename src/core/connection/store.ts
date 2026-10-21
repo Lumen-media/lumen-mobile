@@ -1,17 +1,17 @@
-import { create } from "zustand";
+import { create } from 'zustand';
 
-import type { Permissions } from "@/src/core/protocol";
+import type { Permissions } from '@/src/core/protocol';
 
 export type ConnectionStatus =
-  | "idle"
-  | "connecting"
-  | "registering"
-  | "authenticating"
-  | "connected"
-  | "reconnecting"
-  | "denied"
-  | "expired"
-  | "error";
+  | 'idle'
+  | 'connecting'
+  | 'registering'
+  | 'authenticating'
+  | 'connected'
+  | 'reconnecting'
+  | 'denied'
+  | 'expired'
+  | 'error';
 
 export type Endpoint = { host: string; port: number };
 
@@ -26,7 +26,7 @@ type ConnectionState = {
 };
 
 const initialState: ConnectionState = {
-  status: "idle",
+  status: 'idle',
   error: null,
   desktopName: null,
   permissions: null,
