@@ -2,7 +2,7 @@ import { DarkTheme, Stack, ThemeProvider } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 
-import '../global.css';
+import '../../global.css';
 
 import { GluestackUIProvider } from '@/src/components/ui/gluestack-ui-provider';
 import { initDispatch } from '@/src/core/connection/dispatch';
