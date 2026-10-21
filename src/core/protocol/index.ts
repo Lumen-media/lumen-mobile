@@ -353,7 +353,7 @@ export function isKnown(message: ServerMessage): message is KnownEvent {
   return "protocol" in message || KNOWN_EVENT_NAMES.has(message.event);
 }
 
-const KNOWN_EVENT_NAMES = new Set(
+const KNOWN_EVENT_NAMES = new Set<string>(
   (
     [
       "auth_ok",

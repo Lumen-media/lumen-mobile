@@ -71,6 +71,7 @@ const initialState = {
 export function getLivePosition(state: {
   isPlaying: boolean;
   position: number;
+  duration: number;
   anchoredAt: number;
 }): number {
   if (!state.isPlaying) return state.position;

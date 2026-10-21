@@ -1,4 +1,5 @@
 import { onServerMessage } from "@/src/core/connection/bus";
+import { isKnown } from "@/src/core/protocol";
 import { useChatStore } from "@/src/features/chat/chat-store";
 import { usePlayerStore } from "@/src/features/player/player-store";
 import { usePresentationStore } from "@/src/features/presentation/presentation-store";
@@ -12,6 +13,7 @@ export function initDispatch(): void {
   initialized = true;
 
   onServerMessage((message) => {
+    if (!isKnown(message)) return;
     switch (message.event) {
       case "player_sync":
         usePlayerStore.getState().applySync(message);

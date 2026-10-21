@@ -3,6 +3,7 @@ import { AppState, Platform, type AppStateStatus } from "react-native";
 
 import {
   DEFAULT_PERMISSIONS,
+  isKnown,
   type AuthOk,
   type Permissions,
   type ServerMessage,
@@ -207,6 +208,7 @@ class ConnectionManager {
   }
 
   private handleMessage(message: ServerMessage): void {
+    if (!isKnown(message)) return;
     if (message.event === "auth_ok") {
       void this.handleAuthOk(message);
     } else if (message.event === "auth_fail") {
