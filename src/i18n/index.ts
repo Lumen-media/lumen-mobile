@@ -3,13 +3,12 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
 import en from './locales/en';
-import es from './locales/es';
-import pt from './locales/pt';
 
 /**
- * i18n for the remote app. Starts with the three locales shipped by the
- * desktop (en/pt/es); resource bundles can later be swapped for
- * `lumen-locales` OTA downloads without touching call sites.
+ * English is the only locale bundled in the app. Translations live in the
+ * centralized lumen-locales repo and are expected to be pulled in at build
+ * time (CI). Language detection stays wired so injected locales light up
+ * automatically.
  */
 
 function pickLanguage(): string {
@@ -21,8 +20,6 @@ function pickLanguage(): string {
 void i18n.use(initReactI18next).init({
   resources: {
     en: { translation: en },
-    pt: { translation: pt },
-    es: { translation: es },
   },
   lng: pickLanguage(),
   fallbackLng: 'en',
