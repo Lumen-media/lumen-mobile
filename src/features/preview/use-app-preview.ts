@@ -1,25 +1,28 @@
 import { useEffect, useState } from 'react';
-import { type MediaStream, RTCPeerConnection } from 'react-native-webrtc';
+import type { MediaStream } from 'react-native-webrtc';
 
 import { onServerMessage } from '@/src/core/connection/bus';
 import { connection } from '@/src/core/connection/manager';
 import { isKnown } from '@/src/core/protocol';
+
+import { RTCPeerConnection } from './webrtc';
 
 export type PreviewState = 'idle' | 'starting' | 'live' | 'error';
 
 /**
  * Consumes the desktop's `app_preview` WebRTC stream (signaling over the
  * control WS). Call with `enabled` while the preview area is visible.
+ * Reports `error` when react-native-webrtc is unavailable (Expo Go).
  */
 export function useAppPreview(enabled: boolean): {
   state: PreviewState;
   stream: MediaStream | null;
 } {
-  const [state, setState] = useState<PreviewState>('idle');
+  const [state, setState] = useState<PreviewState>(() => (RTCPeerConnection ? 'idle' : 'error'));
   const [stream, setStream] = useState<MediaStream | null>(null);
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled || !RTCPeerConnection) return;
     let cancelled = false;
 
     const pc = new RTCPeerConnection({ iceServers: [] });

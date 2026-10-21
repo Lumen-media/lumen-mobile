@@ -3,12 +3,12 @@ import { useKeepAwake } from 'expo-keep-awake';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, Text, View } from 'react-native';
-import { RTCView } from 'react-native-webrtc';
 
 import { useConnectionStore } from '@/src/core/connection/store';
 import { formatTime } from '@/src/features/common/format';
 import { getLivePosition, usePlayerStore } from '@/src/features/player/player-store';
 import { useAppPreview } from '@/src/features/preview/use-app-preview';
+import { RTCView } from '@/src/features/preview/webrtc';
 
 export default function RemoteScreen() {
   useKeepAwake();
@@ -37,7 +37,7 @@ export default function RemoteScreen() {
     <View className="flex-1 bg-background p-4">
       {permissions?.streaming ? (
         <View className="bg-surface border-edge aspect-video w-full overflow-hidden rounded-xl border">
-          {preview.state === 'live' && preview.stream ? (
+          {preview.state === 'live' && preview.stream && RTCView ? (
             <RTCView streamURL={preview.stream.toURL()} objectFit="contain" style={{ flex: 1 }} />
           ) : (
             <View className="flex-1 items-center justify-center">
