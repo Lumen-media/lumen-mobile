@@ -43,7 +43,8 @@
           "cameraPermission": "Permite escanear o QR code de pareamento com o desktop Lumen."
         }
       ],
-      "expo-localization"
+      "expo-localization",
+      "expo-image"
     ],
     "experiments": {
       "typedRoutes": true
