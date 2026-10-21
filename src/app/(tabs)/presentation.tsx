@@ -20,6 +20,8 @@ export default function PresentationScreen() {
     toggleWallpaper,
   } = usePresentationStore();
 
+  const hasSlides = totalSlides > 0;
+
   if (!permissions?.presentation) {
     return (
       <View className="flex-1 items-center justify-center bg-background p-6">
@@ -36,18 +38,22 @@ export default function PresentationScreen() {
         {currentDeck || kind || t('presentation.title')}
       </Text>
       <Text className="text-muted-foreground mt-1 text-sm">
-        {t('presentation.slideOf', { current: slideIndex + 1, total: totalSlides })}
+        {hasSlides
+          ? t('presentation.slideOf', { current: slideIndex + 1, total: totalSlides })
+          : t('presentation.empty')}
       </Text>
 
       <View className="mt-8 flex-row items-center justify-center gap-8">
         <Pressable
-          className="border-edge bg-surface-raised h-20 w-20 items-center justify-center rounded-2xl border"
+          className="border-edge bg-surface-raised h-20 w-20 items-center justify-center rounded-2xl border disabled:opacity-40"
+          disabled={!hasSlides}
           onPress={() => slidePrev()}
         >
           <Text className="text-foreground text-3xl">←</Text>
         </Pressable>
         <Pressable
-          className="bg-lumen-600 h-24 w-24 items-center justify-center rounded-full"
+          className="bg-lumen-600 h-24 w-24 items-center justify-center rounded-full disabled:opacity-40"
+          disabled={!hasSlides}
           onPress={() => slideNext()}
         >
           <Text className="text-white text-4xl">→</Text>

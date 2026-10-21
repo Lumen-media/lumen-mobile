@@ -77,6 +77,14 @@ export default function ChatScreen() {
                   <Text className="text-lumen-500 text-xs font-semibold">{item.sender_name}</Text>
                 ) : null}
                 <Text className="text-foreground text-sm">{item.text}</Text>
+                {item.ts ? (
+                  <Text className="text-muted-foreground mt-1 text-[10px]">
+                    {new Date(item.ts < 1e12 ? item.ts * 1000 : item.ts).toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </Text>
+                ) : null}
               </View>
             );
           }}
@@ -97,6 +105,7 @@ export default function ChatScreen() {
           value={text}
           onChangeText={setText}
           editable={!sending}
+          returnKeyType="send"
           onSubmitEditing={() => {
             void send(text).then((ok) => {
               if (ok) setText('');

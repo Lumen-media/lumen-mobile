@@ -143,7 +143,7 @@ export default function RemoteScreen() {
             <Text className="text-white text-sm font-semibold">{t('remote.loop')}</Text>
           </Pressable>
           <Pressable disabled={!canControl} onPress={() => player.stop()}>
-            <Text className="text-red-400 text-sm font-semibold">■ Stop</Text>
+            <Text className="text-red-400 text-sm font-semibold">■ {t('remote.stop')}</Text>
           </Pressable>
         </View>
       </View>

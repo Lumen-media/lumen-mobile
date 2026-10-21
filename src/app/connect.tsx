@@ -1,6 +1,6 @@
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, Text, View } from 'react-native';
 
@@ -8,6 +8,7 @@ import { connection } from '@/src/core/connection/manager';
 import { useConnectionStore } from '@/src/core/connection/store';
 import { parsePairingQr } from '@/src/core/pairing/parse-pairing-qr';
 import { listPaired, type PairedDevice, removePaired } from '@/src/core/secure/devices';
+import { connectionError } from '@/src/features/common/connection-error';
 
 export default function ConnectScreen() {
   const { t } = useTranslation();
@@ -17,6 +18,7 @@ export default function ConnectScreen() {
   const [scanning, setScanning] = useState(false);
   const [qrError, setQrError] = useState<string | null>(null);
   const [permission, requestPermission] = useCameraPermissions();
+  const scannedRef = useRef(false);
 
   useEffect(() => {
     void listPaired().then(setDevices);
@@ -27,9 +29,12 @@ export default function ConnectScreen() {
   }, [status]);
 
   function onScanned({ data }: { data: string }) {
+    if (scannedRef.current) return;
+    scannedRef.current = true;
     const target = parsePairingQr(data);
     if (!target) {
       setQrError(t('errors.qrInvalid'));
+      scannedRef.current = false;
       return;
     }
     setQrError(null);
@@ -43,6 +48,7 @@ export default function ConnectScreen() {
       const result = await requestPermission();
       if (!result.granted) return;
     }
+    scannedRef.current = false;
     setScanning(true);
   }
 
@@ -112,13 +118,14 @@ export default function ConnectScreen() {
       </View>
 
       {error ? (
-        <Text className="text-red-400 mt-4 text-sm">{error}</Text>
+        <Text className="text-red-400 mt-4 text-sm">{connectionError(t, error)}</Text>
       ) : (
         <Text className="text-muted-foreground mt-4 text-sm">{t(`connect.status.${status}`)}</Text>
       )}
 
       <Pressable
-        className="bg-primary mt-6 items-center rounded-xl py-4"
+        className="bg-primary mt-6 items-center rounded-xl py-4 disabled:opacity-40"
+        disabled={status === 'connecting' || status === 'registering'}
         onPress={() => void openScanner()}
       >
         <Text className="text-primary-foreground font-semibold">{t('connect.scanQr')}</Text>

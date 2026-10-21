@@ -45,6 +45,7 @@ export default {
     mute: 'Mute',
     unmute: 'Unmute',
     loop: 'Loop',
+    stop: 'Stop',
     keepScreenOn: 'Keep screen on',
   },
   queue: {
@@ -64,6 +65,7 @@ export default {
     blackout: 'Blackout',
     wallpaper: 'Wallpaper',
     slideOf: 'Slide {{current}} of {{total}}',
+    empty: 'No active presentation',
     noPermission: "You don't have permission to control the presentation.",
   },
   chat: {
@@ -80,5 +82,11 @@ export default {
     notConnected: 'Not connected to the desktop',
     ackTimeout: 'The desktop did not respond',
     qrInvalid: 'This QR code is not a Lumen pairing code',
+    unauthorized: 'The desktop denied remote access for this device',
+    forbidden: 'This device is not allowed to control the desktop',
+    deviceGone: 'This desktop is no longer available',
+    tokenExpired: 'Pairing expired. Scan the QR code again.',
+    tokenRevoked: 'This device was unregistered on the desktop. Pair again.',
+    deviceDeactivated: 'This device was deactivated on the desktop.',
   },
 } as const;
